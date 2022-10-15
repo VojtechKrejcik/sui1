@@ -1,0 +1,114 @@
+Hloubka: 1
+Počet sousedů na stacku (před dekrementací!): 1
+Stav: 0x557d5bc1d0e0
+Hloubka: 2
+Počet sousedů na stacku (před dekrementací!): 44
+Stav: 0x557d5bc2e5a0
+Hloubka: 3
+Počet sousedů na stacku (před dekrementací!): 36
+Stav: 0x557d5bc3ac80
+Hloubka: 4
+Počet sousedů na stacku (před dekrementací!): 35
+Stav: 0x557d5bc468a0
+Hloubka: 5
+Počet sousedů na stacku (před dekrementací!): 30
+Stav: 0x557d5bc4ffe0
+Hloubka: 6
+Počet sousedů na stacku (před dekrementací!): 23
+Stav: 0x557d5bc57920
+Hloubka: 7
+Počet sousedů na stacku (před dekrementací!): 14
+Stav: 0x557d5bc5c230
+Hloubka: 8
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc5cd30
+Hloubka: 9
+Počet sousedů na stacku (před dekrementací!): 2
+Stav: 0x557d5bc5d360
+Hloubka: 10
+Počet sousedů na stacku (před dekrementací!): 12
+Stav: 0x557d5bc60e30
+Hloubka: 11
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc61990
+Hloubka: 12
+Počet sousedů na stacku (před dekrementací!): 13
+Stav: 0x557d5bc65cb0
+Hloubka: 13
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc66850
+PRDELHloubka: 13
+Počet sousedů na stacku (před dekrementací!): 2
+Stav: 0x557d5bc66320
+Hloubka: 14
+Počet sousedů na stacku (před dekrementací!): 13
+Stav: 0x557d5bc6a3f0
+Hloubka: 15
+Počet sousedů na stacku (před dekrementací!): 21
+Stav: 0x557d5bc70e80
+PRDELHloubka: 15
+Počet sousedů na stacku (před dekrementací!): 20
+Stav: 0x557d5bc70990
+Hloubka: 16
+Počet sousedů na stacku (před dekrementací!): 13
+Stav: 0x557d5bc74be0
+Hloubka: 17
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc757a0
+PRDELHloubka: 17
+Počet sousedů na stacku (před dekrementací!): 2
+Stav: 0x557d5bc75260
+Hloubka: 18
+Počet sousedů na stacku (před dekrementací!): 12
+Stav: 0x557d5bc79000
+PRDELHloubka: 18
+Počet sousedů na stacku (před dekrementací!): 11
+Stav: 0x557d5bc78aa0
+Hloubka: 19
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc79620
+Hloubka: 20
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc7a230
+PRDELHloubka: 20
+Počet sousedů na stacku (před dekrementací!): 2
+Stav: 0x557d5bc79d20
+Hloubka: 21
+Počet sousedů na stacku (před dekrementací!): 12
+Stav: 0x557d5bc7d7d0
+Hloubka: 22
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc7e380
+Hloubka: 23
+Počet sousedů na stacku (před dekrementací!): 13
+Stav: 0x557d5bc82500
+Hloubka: 24
+Počet sousedů na stacku (před dekrementací!): 4
+Stav: 0x557d5bc83830
+PRDELHloubka: 24
+Počet sousedů na stacku (před dekrementací!): 3
+Stav: 0x557d5bc83300
+Hloubka: 25
+Počet sousedů na stacku (před dekrementací!): 14
+Stav: 0x557d5bc87a80
+Hloubka: 26
+Počet sousedů na stacku (před dekrementací!): 14
+Stav: 0x557d5bc8c1d0
+PRDELHloubka: 26
+Počet sousedů na stacku (před dekrementací!): 13
+Stav: 0x557d5bc8bce0
+Hloubka: 27
+Počet sousedů na stacku (před dekrementací!): 22
+Stav: 0x557d5bc92d50
+Hloubka: 28
+Počet sousedů na stacku (před dekrementací!): 14
+Stav: 0x557d5bc977f0
+Hloubka: 29
+Počet sousedů na stacku (před dekrementací!): 14
+Stav: 0x557d5bc9bf40
+PRDELHloubka: 29
+Počet sousedů na stacku (před dekrementací!): 13
+Stav: 0x557d5bc9bb00
+PRDELHloubka: 29
+Počet sousedů na stacku (před dekrementací!): 12
+Stav: 0x557d5bc9b660
