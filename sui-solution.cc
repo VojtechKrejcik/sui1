@@ -8,6 +8,9 @@
 #include <memory>
 #include <stack>
 
+
+typedef std::shared_ptr<SearchState> state_ptr;
+
 std::string str(std::shared_ptr<SearchState> state)
 {
 	std::stringstream buffer;
@@ -15,9 +18,58 @@ std::string str(std::shared_ptr<SearchState> state)
 	return buffer.str();
 }
 
+class AState
+{
+	public:
+		state_ptr state;
+		double heuristic_value;
+
+		AState(state_ptr state,double heuristic_value)
+			: state(state), heuristic_value(heuristic_value)
+		{		
+		}
+
+		std::string to_string()
+		{
+			return str(state);
+		}
+
+		int hash()
+		{
+			std::hash<std::string> hash_string;
+			return hash_string(this->to_string());
+		}
+};
+
+std::ostream& operator<< (std::ostream& os, AState& s)
+{
+		os << "State: " << *s.state<<std::endl<<"Heuristic value: " << s.heuristic_value<<std::endl;
+		return os;
+}
+std::ostream& operator<< (std::ostream& os,const AState s)
+{
+		os << "State: " << *s.state<<std::endl<<"Heuristic value: " << s.heuristic_value<<std::endl;
+		return os;
+}
+bool operator<(const AState &s1, const AState &s2)
+{
+		return s1.heuristic_value < s2.heuristic_value;
+}
+bool operator>(const AState &s1, const AState &s2)
+{
+		return s1.heuristic_value > s2.heuristic_value;
+}
+bool operator==(const AState &s1, const AState &s2)
+{
+		return s1.heuristic_value == s2.heuristic_value;
+}
+bool operator!=(const AState &s1, const AState &s2)
+{
+		return s1.heuristic_value != s2.heuristic_value;
+}
+
 std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_state) {
 
-	typedef std::shared_ptr<SearchState> state_ptr;
 	std::hash<std::string> hash_string;
 	std::queue<state_ptr> open;
 	std::unordered_set<int> closed;
@@ -25,10 +77,7 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 	state_ptr working_state = std::make_shared<SearchState>(init_state);
 	open.push(working_state);
 
-	backtrackmap.insert({hash_string(str(working_state)),{hash_string(str(working_state)),working_state->actions().front()}});
-
-	
-	 
+	backtrackmap.insert({hash_string(str(working_state)),{hash_string(str(working_state)),working_state->actions().front()}}); 
 
 	while (!open.empty())
 	{
@@ -74,7 +123,6 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 
 std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state) {
 
-	typedef std::shared_ptr<SearchState> state_ptr;
 	std::hash<std::string> hash_string;
 	std::stack<state_ptr> open;
 	std::stack<int> depth;
@@ -146,9 +194,65 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 }
 
 double StudentHeuristic::distanceLowerBound(const GameState &state) const {
-    return 0;
+    int cards_out_of_home = king_value * colors_list.size();
+    for (const auto &home : state.homes) {
+        auto opt_top = home.topCard();
+        if (opt_top.has_value())
+            cards_out_of_home -= opt_top->value;
+    }
+
+    return cards_out_of_home;
 }
 
 std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
+
+	std::priority_queue<AState,std::vector<AState>,std::greater<AState>> open;
+	std::unordered_set<int> closed;
+	std::map<int,std::tuple<int,SearchAction>> backtrackmap;
+	AState working_state(std::make_shared<SearchState>(init_state),-1);
+	
+	open.push(working_state);
+	backtrackmap.insert({working_state.hash(),{working_state.hash(),working_state.state->actions().front()}});
+
+	while (!open.empty())
+	{
+		AState state = open.top();
+		state_ptr cur_state = state.state;
+		int cur_state_hash = state.hash();
+		open.pop();
+
+		if (cur_state->isFinal())
+		{	
+			std::vector<SearchAction> solution = {};
+			int child_state = cur_state_hash;
+			int parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
+
+			while (child_state != parent_state)
+			{
+				solution.insert(solution.begin(),std::get<1>(backtrackmap.at(child_state)));
+				child_state = parent_state;
+				parent_state = std::get<0>(backtrackmap.at(child_state));
+			}
+			return solution;
+		}
+		
+		if(closed.count(cur_state_hash) >= 1)
+		{
+			continue;
+		}
+		auto actions = cur_state->actions();
+
+		if (actions.size() == 0)
+			continue;
+		
+		for (long unsigned int i=0; i < actions.size();i++)
+		{
+			AState new_state(std::make_shared<SearchState>(actions[i].execute(*cur_state)),compute_heuristic(*cur_state,*this->heuristic_));
+			open.push(new_state);
+			backtrackmap.insert({new_state.hash(),{cur_state_hash,actions[i]}});
+		}
+		
+		closed.insert(cur_state_hash);
+	}
 	return {};
 }
