@@ -132,6 +132,7 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 
 	std::hash<std::string> hash_string;
 	std::stack<state_ptr> open;
+	std::unordered_set<size_t> h_open;
 	std::stack<int> depth;
 	std::unordered_set<size_t> closed;
 	std::map<size_t,std::tuple<size_t,SearchAction>> backtrackmap;
@@ -191,7 +192,16 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 			for (size_t i=0; i < actions.size();i++)
 			{
 				state_ptr new_state = std::make_shared<SearchState>(actions[i].execute(*cur_state));
+				size_t new_state_hash = hash_string(str(new_state));
+				if((closed.count(new_state_hash) >= 1)
+				|| (h_open.count(new_state_hash) >= 1))
+				{			
+					depth.top()--;
+					continue;
+				}	
+
 				open.push(new_state);
+				h_open.insert(new_state_hash);
 				backtrackmap.insert({hash_string(str(new_state)),{cur_state_hash,actions[i]}});
 			}
 		}
