@@ -74,6 +74,7 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 	std::hash<std::string> hash_string;
 	std::queue<state_ptr> open;
 	std::unordered_set<size_t> closed;
+	std::unordered_set<size_t> h_open;
 	std::map<size_t,std::tuple<size_t,SearchAction>> backtrackmap;
 	state_ptr working_state = std::make_shared<SearchState>(init_state);
 	open.push(working_state);
@@ -98,7 +99,8 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 		for (size_t i=0; i < actions.size();i++)
 		{
 			state_ptr new_state = std::make_shared<SearchState>(actions[i].execute(*cur_state));
-			if((closed.count(hash_string(str(new_state))) >= 1))
+			if((closed.count(hash_string(str(new_state))) >= 1)
+			|| (h_open.count(hash_string(str(new_state))) >= 1))
 			{
 				continue;
 			}			
@@ -117,6 +119,7 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 				}
 				return solution;
 			}
+			h_open.insert(hash_string(str(new_state)));
 			open.push(new_state);
 		}	
 		
