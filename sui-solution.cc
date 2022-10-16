@@ -7,6 +7,7 @@
 #include <tuple>
 #include <memory>
 #include <stack>
+#include "memusage.h"
 
 
 typedef std::shared_ptr<SearchState> state_ptr;
@@ -34,7 +35,7 @@ class AState
 			return str(state);
 		}
 
-		int hash()
+		size_t hash()
 		{
 			std::hash<std::string> hash_string;
 			return hash_string(this->to_string());
@@ -72,8 +73,8 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 
 	std::hash<std::string> hash_string;
 	std::queue<state_ptr> open;
-	std::unordered_set<int> closed;
-	std::map<int,std::tuple<int,SearchAction>> backtrackmap;
+	std::unordered_set<size_t> closed;
+	std::map<size_t,std::tuple<size_t,SearchAction>> backtrackmap;
 	state_ptr working_state = std::make_shared<SearchState>(init_state);
 	open.push(working_state);
 
@@ -82,40 +83,43 @@ std::vector<SearchAction> BreadthFirstSearch::solve(const SearchState &init_stat
 	while (!open.empty())
 	{
 		state_ptr cur_state = open.front();
-		int cur_state_hash = hash_string(str(cur_state));
+
+		size_t cur_state_hash = hash_string(str(cur_state));
 		open.pop();
-		if (cur_state->isFinal())
-		{	
-			std::vector<SearchAction> solution = {};
-			int child_state = cur_state_hash;
-			int parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
-
-			while (child_state != parent_state)
-			{
-				solution.insert(solution.begin(),std::get<1>(backtrackmap.at(child_state)));
-				child_state = parent_state;
-				parent_state = std::get<0>(backtrackmap.at(child_state));
-			}
-			return solution;
-		}
-
-		if(closed.count(cur_state_hash) >= 1)
+		if((closed.count(cur_state_hash) >= 1))
 		{
 			continue;
-		}
+		}	
+		closed.insert(cur_state_hash);
 		auto actions = cur_state->actions();
-
-		if (actions.size() == 0)
+		if(actions.size() == 0)
 			continue;
 		
-		for (long unsigned int i=0; i < actions.size();i++)
+		for (size_t i=0; i < actions.size();i++)
 		{
 			state_ptr new_state = std::make_shared<SearchState>(actions[i].execute(*cur_state));
-			open.push(new_state);
+			if((closed.count(hash_string(str(new_state))) >= 1))
+			{
+				continue;
+			}			
 			backtrackmap.insert({hash_string(str(new_state)),{cur_state_hash,actions[i]}});
-		}
+			if (new_state->isFinal())
+			{	
+				std::vector<SearchAction> solution = {};
+				cur_state_hash = hash_string(str(new_state));
+				size_t child_state = cur_state_hash;
+				size_t parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
+				while (child_state != parent_state)
+				{
+					solution.insert(solution.begin(),std::get<1>(backtrackmap.at(child_state)));
+					child_state = parent_state;
+					parent_state = std::get<0>(backtrackmap.at(child_state));
+				}
+				return solution;
+			}
+			open.push(new_state);
+		}	
 		
-		closed.insert(cur_state_hash);
 	}
 	return {};
 }
@@ -125,9 +129,9 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 
 	std::hash<std::string> hash_string;
 	std::stack<state_ptr> open;
-	std::stack<int> depth;
-	std::unordered_set<int> closed;
-	std::map<int,std::tuple<int,SearchAction>> backtrackmap;
+	std::stack<size_t> depth;
+	std::unordered_set<size_t> closed;
+	std::map<size_t,std::tuple<size_t,SearchAction>> backtrackmap;
 	state_ptr working_state = std::make_shared<SearchState>(init_state);
 
 	open.push(working_state);
@@ -137,15 +141,15 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 	while (!open.empty())
 	{
 		state_ptr cur_state = open.top();
-		int cur_state_hash = hash_string(str(cur_state));
+		size_t cur_state_hash = hash_string(str(cur_state));
 		open.pop();
 
 		
 		if (cur_state->isFinal())
 		{	
 			std::vector<SearchAction> solution = {};
-			int child_state = cur_state_hash;
-			int parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
+			size_t child_state = cur_state_hash;
+			size_t parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
 
 			while (child_state != parent_state)
 			{
@@ -170,7 +174,7 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 		closed.insert(cur_state_hash);
 		
 
-		if ((depth.size() >= this->depth_limit_) || (actions.size() == 0)) // Dosáhl jsem hloubkového limitu nebo nemám kam
+		if ((depth.size() >= (size_t)this->depth_limit_) || (actions.size() == 0)) // Dosáhl jsem hloubkového limitu nebo nemám kam
 		{
 			if (depth.top() <= 0 ) // nemám sousedy -> jdu o úroveň výš
 			{
@@ -181,7 +185,7 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 		else // Expanduji do hloubky
 		{
 			depth.push(actions.size());
-			for (long unsigned int i=0; i < actions.size();i++)
+			for (size_t i=0; i < actions.size();i++)
 			{
 				state_ptr new_state = std::make_shared<SearchState>(actions[i].execute(*cur_state));
 				open.push(new_state);
@@ -194,7 +198,7 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 }
 
 double StudentHeuristic::distanceLowerBound(const GameState &state) const {
-    int cards_out_of_home = king_value * colors_list.size();
+    size_t cards_out_of_home = king_value * colors_list.size();
     for (const auto &home : state.homes) {
         auto opt_top = home.topCard();
         if (opt_top.has_value())
@@ -207,8 +211,8 @@ double StudentHeuristic::distanceLowerBound(const GameState &state) const {
 std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 
 	std::priority_queue<AState,std::vector<AState>,std::greater<AState>> open;
-	std::unordered_set<int> closed;
-	std::map<int,std::tuple<int,SearchAction>> backtrackmap;
+	std::unordered_set<size_t> closed;
+	std::map<size_t,std::tuple<size_t,SearchAction>> backtrackmap;
 	AState working_state(std::make_shared<SearchState>(init_state),-1);
 	
 	open.push(working_state);
@@ -218,14 +222,14 @@ std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 	{
 		AState state = open.top();
 		state_ptr cur_state = state.state;
-		int cur_state_hash = state.hash();
+		size_t cur_state_hash = state.hash();
 		open.pop();
 
 		if (cur_state->isFinal())
 		{	
 			std::vector<SearchAction> solution = {};
-			int child_state = cur_state_hash;
-			int parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
+			size_t child_state = cur_state_hash;
+			size_t parent_state = std::get<0>(backtrackmap.at(cur_state_hash));
 
 			while (child_state != parent_state)
 			{
@@ -245,7 +249,7 @@ std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 		if (actions.size() == 0)
 			continue;
 		
-		for (long unsigned int i=0; i < actions.size();i++)
+		for (size_t i=0; i < actions.size();i++)
 		{
 			AState new_state(std::make_shared<SearchState>(actions[i].execute(*cur_state)),compute_heuristic(*cur_state,*this->heuristic_));
 			open.push(new_state);
