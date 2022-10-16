@@ -203,16 +203,60 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 }
 
 double StudentHeuristic::distanceLowerBound(const GameState &state) const {
+	
+	int cur_max = 0;
+	int top_sum = 0;
+    for (const auto &home : state.homes) {
+        auto opt_top = home.topCard();
+        if (opt_top.has_value())
+		{
+				top_sum += opt_top->value;
+				if(cur_max < opt_top->value)
+					cur_max = opt_top->value;
+		}
+    }
+	int stack_top_sum = 0;
+	int stack_bottom_sum = 0;
+	for (const auto &stack : state.stacks) {
+        auto opt_top = stack.topCard();
+        if (opt_top.has_value())
+		{
+				stack_top_sum += opt_top->value;
+				stack_bottom_sum += stack.storage().back().value;
+		}
+    }
+	double max_in_home = king_value - cur_max;
+	//double difference_from_top = 13 - (top_sum/4 - stack_top_sum/8);
+	double sum_of_bottom_cards = 100-stack_bottom_sum;
+	return sum_of_bottom_cards;
+    return max_in_home + 0.1*sum_of_bottom_cards;	
+}
 
+/*
 
+TOHLE JE ZATIM NEJLEPSI 
+============================================
+	int cur_max = 0;
+    for (const auto &home : state.homes) {
+        auto opt_top = home.topCard();
+        if (opt_top.has_value())
+            if(cur_max < opt_top->value)
+				cur_max = opt_top->value;
+    }
+
+    return king_value - cur_max;
+==============================================
+}
 	size_t sum = 0;
 	std::vector<int> wantedValues = {1,1,1,1};
 
-	
-	for (const auto &home : state.homes) {
+	int notHome = king_value * colors_list.size();
+	for (const auto&home : state.homes) {
         auto top = home.topCard();
 		if(top.has_value())
 		{
+			if( top.value().value > 8)
+				notHome -= top->value;
 			if(top.value().value == king_value)
 			{
 				continue;
@@ -220,11 +264,14 @@ double StudentHeuristic::distanceLowerBound(const GameState &state) const {
 			wantedValues[(int)top.value().color] = top.value().value + 1;
 		}
 	}
-	bool prazdny_stack = false;
+	int prazdny_stack = 0;
 	for(const auto& stack : state.stacks)
 	{
 		auto stackCards = stack.storage(); 	
-		if (stackCards.size() == 0) prazdny_stack = true;
+		if (stackCards.size() == 0) 
+		{
+			prazdny_stack += 1;
+		}
 		long unsigned int stacksize = stackCards.size();
 		for(long unsigned int i=0;i<stacksize;i++)
 		{
@@ -233,21 +280,30 @@ double StudentHeuristic::distanceLowerBound(const GameState &state) const {
 				sum += i;
 		}
 	}
-
-	if(prazdny_stack)
+	//Count free cells
+	for(const auto& freeCell : state.free_cells)
 	{
-		return sum;
+			if(!freeCell.topCard().has_value()) prazdny_stack +=1;
 	}
-	else
-	{
-		for(const auto& freeCell : state.free_cells)
-		{
-			if(!freeCell.topCard().has_value()) return sum;
-		}
-		return sum*2;
-	}
-	return sum*2;
+	
+	//std::cout<<summa<<" "<<notHome/52<<" "<<(12-prazdny_stack)/12<<std::endl;
+	
+	//return notHome;
+	//return (12-prazdny_stack)/12;
+	
+	if(prazdny_stack > 0) return sum;
+	return (sum)*2;
 }
+
+    int cards_out_of_home = king_value * colors_list.size();
+    for (const auto &home : state.homes) {
+        auto opt_top = home.topCard();
+        if (opt_top.has_value())
+            cards_out_of_home -= opt_top->value;
+    }
+
+    return cards_out_of_home;
+*/
 
 std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 
@@ -291,7 +347,7 @@ std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 
 		if (actions.size() == 0)
 			continue;
-		
+
 		for (size_t i=0; i < actions.size();i++)
 		{
 			AState new_state(std::make_shared<SearchState>(actions[i].execute(*cur_state)),compute_heuristic(*cur_state,*this->heuristic_));
