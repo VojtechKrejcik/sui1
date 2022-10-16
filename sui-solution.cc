@@ -8,6 +8,8 @@
 #include <memory>
 #include <stack>
 #include "memusage.h"
+#include "card.h"
+
 
 
 typedef std::shared_ptr<SearchState> state_ptr;
@@ -201,14 +203,50 @@ std::vector<SearchAction> DepthFirstSearch::solve(const SearchState &init_state)
 }
 
 double StudentHeuristic::distanceLowerBound(const GameState &state) const {
-    size_t cards_out_of_home = king_value * colors_list.size();
-    for (const auto &home : state.homes) {
-        auto opt_top = home.topCard();
-        if (opt_top.has_value())
-            cards_out_of_home -= opt_top->value;
-    }
 
-    return cards_out_of_home;
+
+	size_t sum = 0;
+	std::vector<int> wantedValues = {1,1,1,1};
+
+	
+	for (const auto &home : state.homes) {
+        auto top = home.topCard();
+		if(top.has_value())
+		{
+			if(top.value().value == king_value)
+			{
+				continue;
+			}
+			wantedValues[(int)top.value().color] = top.value().value + 1;
+		}
+	}
+	bool prazdny_stack = false;
+	for(const auto& stack : state.stacks)
+	{
+		auto stackCards = stack.storage(); 	
+		if (stackCards.size() == 0) prazdny_stack = true;
+		long unsigned int stacksize = stackCards.size();
+		for(long unsigned int i=0;i<stacksize;i++)
+		{
+			
+			if(wantedValues[(int)stackCards[i].color] == stackCards[i].value)
+				sum += i;
+		}
+	}
+
+	if(prazdny_stack)
+	{
+		return sum;
+	}
+	else
+	{
+		for(const auto& freeCell : state.free_cells)
+		{
+			if(!freeCell.topCard().has_value()) return sum;
+		}
+		return sum*2;
+	}
+	return sum*2;
 }
 
 std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
@@ -227,6 +265,7 @@ std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 		state_ptr cur_state = state.state;
 		size_t cur_state_hash = state.hash();
 		open.pop();
+		
 
 		if (cur_state->isFinal())
 		{	
@@ -247,6 +286,7 @@ std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 		{
 			continue;
 		}
+		closed.insert(cur_state_hash);
 		auto actions = cur_state->actions();
 
 		if (actions.size() == 0)
@@ -259,7 +299,6 @@ std::vector<SearchAction> AStarSearch::solve(const SearchState &init_state) {
 			backtrackmap.insert({new_state.hash(),{cur_state_hash,actions[i]}});
 		}
 		
-		closed.insert(cur_state_hash);
 	}
 	return {};
 }
